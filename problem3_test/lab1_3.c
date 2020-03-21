@@ -28,8 +28,8 @@ int main(void){
     
     student info[length];
     for(i = 0; i < length; i++){
-        info[i].name = malloc(21 * sizeof(char));
-        fscanf(input_file, "%20s %d", info[i].name, &info[i].id);
+        info[i].name = malloc(31 * sizeof(char));
+        fscanf(input_file, "%30s %d", info[i].name, &info[i].id);
     }
 
     sort(info, length);
