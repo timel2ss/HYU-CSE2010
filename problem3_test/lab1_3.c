@@ -28,7 +28,7 @@ int main(void){
     
     student info[length];
     for(i = 0; i < length; i++){
-        info[i].name = malloc(31 * sizeof(char));
+        info[i].name = (char *)malloc(31 * sizeof(char));
         fscanf(input_file, "%30s %d", info[i].name, &info[i].id);
     }
 
