@@ -22,6 +22,8 @@ void PrintList(List L);
 void Delete(ElementType X, List L);
 Position Find(ElementType X, List L);
 
+FILE *output;
+
 int main(int argc, char *argv[]){
     char command;
     int key1, key2;
@@ -33,6 +35,11 @@ int main(int argc, char *argv[]){
         printf("File cannot be found\n");
         return 1;
     }
+    if(argc <= 2){
+        printf("Please type output file's name\n");
+        return 2;
+    }
+    output = fopen(argv[2], "wt");
     header = MakeEmpty(header);
     while(1){
         command = fgetc(input);
@@ -47,23 +54,29 @@ int main(int argc, char *argv[]){
                     if(!IsLast(tmp, header))
                         Insert(key1, header, tmp->next);
                     else
-                        printf("Insertion(%d) Failed: cannot find the location to be inserted\n", key1);
+                        fprintf(output, "Insertion(%d) Failed: cannot find the location to be inserted\n", key1);
                 }
                 break;
             case 'd':
                 fscanf(input, "%d", &key1);
-                Delete(key1, header);
+                tmp = Find(key1, header);
+                if(!IsLast(tmp, header)){
+                    Delete(key1, tmp);
+                }
+                else
+                    fprintf(output, "Deletion(%d) Failed: Element %d is not in the list\n", key1, key1);
+
                 break;
             case 'f':
                 fscanf(input, "%d", &key1);
                 tmp = Find(key1, header);
                 if(IsLast(tmp, header))
-                    printf("Finding(%d) Failed: Element %d is not in the list\n", key1, key1);
+                    fprintf(output, "Finding(%d) Failed: Element %d is not in the list\n", key1, key1);
                 else {
                     if(tmp->element > 0)
-                        printf("Key of the previous node of %d is %d\n", key1, tmp->element);
+                        fprintf(output, "Key of the previous node of %d is %d\n", key1, tmp->element);
                     else
-                        printf("Key of the previous node of %d is head.\n", key1);
+                        fprintf(output, "Key of the previous node of %d is head.\n", key1);
                 }
                 break;
             case 'p':
@@ -116,20 +129,15 @@ void Insert(ElementType X, List L, Position P) {
 void PrintList(List L) {
     while(L->next != NULL) {
         L = L->next;
-        printf("key: %d  ", L->element);
+        fprintf(output, "key: %d  ", L->element);
     }
-    printf("\n");
+    fprintf(output, "\n");
 }
 
 void Delete(ElementType X, List L) {
-    Position previous = Find(X, L);
-    Position tmp = previous->next;
-    if(!IsLast(previous, L)){
-        previous->next = tmp->next;
-        free(tmp);
-    }
-    else
-        printf("Deletion(%d) Failed: Element %d is not in the list\n", X, X);
+    Position tmp = L->next;
+    L->next = tmp->next;
+    free(tmp);
 }
 
 Position Find(ElementType X, List L) {
