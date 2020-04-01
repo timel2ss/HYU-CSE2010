@@ -89,6 +89,7 @@ int main(int argc, char *argv[]){
     
     DeleteList(header);
     fclose(input);
+    fclose(output);
     return 0;
 }
 
