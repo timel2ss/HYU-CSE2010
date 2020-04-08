@@ -66,7 +66,10 @@ void Push(Stack *S, int X) {
 }
 
 int Pop(Stack *S) {
-    return S->key[(S->top)--];
+    if(S->top > -1)
+        return S->key[(S->top)--];
+    else
+        printf("No Element...\n");
 }
 
 int Postfix(Stack *S, char input_str) {
