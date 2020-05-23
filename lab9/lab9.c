@@ -186,7 +186,7 @@ int Dequeue(Queue Q) {
 
 void sort(Queue Q) {
     int i, j, min, temp;
-    for(i = 0; i < Q->qsize; i++) {
+    for(i = 0; i < Q->qsize - 1; i++) {
         min = i;
         for(j = i + 1; j < Q->qsize; j++) {
             if(Q->key[j] < Q->key[min]) {
