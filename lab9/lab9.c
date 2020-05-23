@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 
     fclose(input);
     fclose(output);
-    //deleteGraph(graph);
+    deleteGraph(graph);
     return 0;
 }
 
@@ -157,7 +157,7 @@ void TopSort(Graph G) {
     }
     
     fprintf(output, "\n");
-    //deleteQueue(queue);
+    deleteQueue(queue);
 }
 
 Queue MakeNewQueue(int X) {
@@ -216,7 +216,7 @@ void deleteQueue(Queue Q) {
 void deleteGraph(Graph G) {
     int i;
     free(G->node);
-    for(i = 0; G->size; i++) {
+    for(i = 0; i < G->size; i++) {
         free(G->matrix[i]);
     }
     free(G->matrix);
