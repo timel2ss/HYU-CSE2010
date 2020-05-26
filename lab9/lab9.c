@@ -17,6 +17,13 @@ struct _Graph {
     int** matrix;
 };
 
+typedef struct _Array* Array;
+struct _Array {
+    int* key;
+    int size;
+    int max_size;
+};
+
 Graph CreateGraph(int* nodes);
 void InsertEdge(Graph G, int a, int b);
 void TopSort(Graph G);
@@ -24,10 +31,13 @@ Queue MakeNewQueue(int X);
 void Enqueue(Queue Q, int X);
 int Dequeue(Queue Q);
 
-void sort(Queue Q);
+Array makeArray(int size);
+void append(Array A, int X);
+void sort(Array A);
 int findIndex(Graph G, int X);
 void deleteQueue(Queue Q);
 void deleteGraph(Graph G);
+void deleteArray(Array A);
 
 FILE* input;
 FILE* output;
@@ -123,6 +133,8 @@ void TopSort(Graph G) {
     int i, j, count, deq, index, adjacent;
     Queue queue = MakeNewQueue(G->size);
     int* inDegrees = (int*)malloc(G->size * sizeof(int));
+    Array array = makeArray(G->size);
+
     for(i = 0; i < G->size; i++){
         inDegrees[i] = 0;
     }
@@ -134,15 +146,19 @@ void TopSort(Graph G) {
                 count += 1;
         }
         inDegrees[j] = count;
+        if(inDegrees[j] == 0) {
+            append(array, G->node[j]);
+        }
     }
 
-    for(i = 0; i < G->size; i++) {
-        if(inDegrees[i] == 0)
-            Enqueue(queue, G->node[i]);
+    sort(array);
+
+    for(i = 0; i < array->size; i++) {
+        Enqueue(queue, array->key[i]);
     }
+    array->size = 0;
 
     while(queue->qsize > 0){
-        sort(queue);
         deq = Dequeue(queue);
         fprintf(output, "%d ", deq);
         index = findIndex(G, deq);
@@ -150,14 +166,20 @@ void TopSort(Graph G) {
         for(i = 0; i < G->size; i++) {
             if(G->matrix[index][i] == 1) {
                 if(--inDegrees[i] == 0) {
-                    Enqueue(queue, G->node[i]);
+                    append(array, G->node[i]);
                 }
             }
         }
+        sort(array);
+        for(i = 0; i < array->size; i++) {
+            Enqueue(queue, array->key[i]);
+        }
+        array->size = 0;
     }
     
     fprintf(output, "\n");
     deleteQueue(queue);
+    deleteArray(array);
 }
 
 Queue MakeNewQueue(int X) {
@@ -165,14 +187,14 @@ Queue MakeNewQueue(int X) {
     temp->max_queue_size = X;
     temp->key = (int*)malloc(temp->max_queue_size * sizeof(int));
     temp->first = 0;
-    temp->rear = 0;
+    temp->rear = -1;
     temp->qsize = 0;
     return temp;
 }
 
 void Enqueue(Queue Q, int X) {
     if(Q->qsize < Q->max_queue_size) {
-        Q->key[Q->rear++] = X;
+        Q->key[++Q->rear] = X;
         Q->qsize += 1;
     }
 }
@@ -184,18 +206,31 @@ int Dequeue(Queue Q) {
     }
 }
 
-void sort(Queue Q) {
+Array makeArray(int size) {
+    int i;
+    Array temp = (Array)malloc(sizeof(struct _Array));
+    temp->max_size = size;
+    temp->size = 0;
+    temp->key = (int*)malloc(sizeof(int) * size);
+    return temp;
+}
+
+void append(Array A, int X) {
+    A->key[A->size++] = X;
+}
+
+void sort(Array A) {
     int i, j, min, temp;
-    for(i = 0; i < Q->qsize - 1; i++) {
+    for(i = 0; i < A->size - 1; i++) {
         min = i;
-        for(j = i + 1; j < Q->qsize; j++) {
-            if(Q->key[j] < Q->key[min]) {
+        for(j = i + 1; j < A->size; j++) {
+            if(A->key[j] < A->key[min]) {
                 min = j;
             }
         }
-        temp = Q->key[i];
-        Q->key[i] = Q->key[min];
-        Q->key[min] = temp;
+        temp = A->key[i];
+        A->key[i] = A->key[min];
+        A->key[min] = temp;
     }
 }
 
@@ -221,4 +256,9 @@ void deleteGraph(Graph G) {
     }
     free(G->matrix);
     free(G);
+}
+
+void deleteArray(Array A) {
+    free(A->key);
+    free(A);
 }
