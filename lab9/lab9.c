@@ -207,7 +207,6 @@ int Dequeue(Queue Q) {
 }
 
 Array makeArray(int size) {
-    int i;
     Array temp = (Array)malloc(sizeof(struct _Array));
     temp->max_size = size;
     temp->size = 0;
