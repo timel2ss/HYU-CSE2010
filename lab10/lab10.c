@@ -21,17 +21,17 @@ typedef struct Heap {
     Node* Element;
 }Heap;
 
-Graph CreateGraph(int size);
-void printShortestPath(Graph g);
+Graph* CreateGraph(int size);
+void printShortestPath(Graph* g);
 Heap* createMinHeap(int heapSize);
 void insertToMinHeap(Heap* minHeap, int vertex, int distance);
 Node deleteMin(Heap* minHeap);
 
 Node CreateNode(int vertex, int dist, int prev);
-int findIndex(Graph G, int X);
+int findIndex(Graph* G, int X);
 int findHeapIndex(Heap* H, int X);
 void rearrange(Heap* heap, int vertex, int distance);
-void showPrev(Graph G, int idx);
+void showPrev(Graph* G, int idx);
 
 FILE* input;
 FILE* output;
@@ -51,55 +51,56 @@ int main(int argc, char* argv[]) {
     int size;
     fscanf(input, "%d\n", &size);
 
-    Graph graph = CreateGraph(size + 1);
+    Graph* graph = CreateGraph(size + 1);
     int node1, node2, weight;
 
     while(fscanf(input, "%d-%d-%d", &node1, &node2, &weight) != EOF) {
-        graph.vertices[node1][node2] = weight;
+        graph->vertices[node1][node2] = weight;
     }
     
     printShortestPath(graph);
 
     int i;
-    free(graph.nodes);
-    for(i = 0; i < graph.size; i++) {
-        free(graph.vertices[i]);
+    free(graph->nodes);
+    for(i = 0; i < graph->size; i++) {
+        free(graph->vertices[i]);
     }
-    free(graph.vertices);
+    free(graph->vertices);
+    free(graph);
     return 0;
 }
 
-Graph CreateGraph(int size) {
+Graph* CreateGraph(int size) {
     int i, j;
-    Graph temp;
-    temp.size = size;
-    temp.vertices = (int**)malloc(sizeof(int*) * size);
-    temp.nodes = (Node*)malloc(sizeof(Node) * size);
+    Graph* temp = (Graph*)malloc(sizeof(Graph));
+    temp->size = size;
+    temp->vertices = (int**)malloc(sizeof(int*) * size);
+    temp->nodes = (Node*)malloc(sizeof(Node) * size);
     
     for(i = 0; i < size; i++) {
-        temp.vertices[i] = (int*)malloc(sizeof(int) * size);
-        temp.nodes[i].vertex = i;
+        temp->vertices[i] = (int*)malloc(sizeof(int) * size);
+        temp->nodes[i].vertex = i;
         for(j = 0; j < size; j++) {
-            temp.vertices[i][j] = 0;
+            temp->vertices[i][j] = 0;
         }
     }
     return temp;
 }
 
-void printShortestPath(Graph g) {
+void printShortestPath(Graph* g) {
     int i, j;
-    Heap* heap = createMinHeap(g.size);
+    Heap* heap = createMinHeap(g->size);
 
-    for(i = 1; i < g.size; i++) {
-        g.nodes[i].dist = INT_MAX;
-        g.nodes[i].prev = -1;
+    for(i = 1; i < g->size; i++) {
+        g->nodes[i].dist = INT_MAX;
+        g->nodes[i].prev = -1;
     }
-    g.nodes[1].dist = 0;
-    for(i = 1; i < g.size; i++) {
-        if(g.vertices[1][i] > 0) {
-            g.nodes[i].dist = g.vertices[1][i];
-            g.nodes[i].prev = 1;
-            insertToMinHeap(heap, g.nodes[i].vertex, g.nodes[i].dist);
+    g->nodes[1].dist = 0;
+    for(i = 1; i < g->size; i++) {
+        if(g->vertices[1][i] > 0) {
+            g->nodes[i].dist = g->vertices[1][i];
+            g->nodes[i].prev = 1;
+            insertToMinHeap(heap, g->nodes[i].vertex, g->nodes[i].dist);
         }
 
     }
@@ -109,24 +110,24 @@ void printShortestPath(Graph g) {
     while(heap->Size > 0) {
         u = deleteMin(heap);
         u_idx = findIndex(g, u.vertex);
-        for(i = 1; i < g.size; i++) {
-            if(g.vertices[u_idx][i] != 0) {
-                if(u.dist + g.vertices[u_idx][i] < g.nodes[i].dist) {
-                    g.nodes[i].dist = u.dist + g.vertices[u_idx][i];
-                    g.nodes[i].prev = u.vertex;
-                    rearrange(heap, g.nodes[i].vertex, g.nodes[i].dist);
+        for(i = 1; i < g->size; i++) {
+            if(g->vertices[u_idx][i] != 0) {
+                if(u.dist + g->vertices[u_idx][i] < g->nodes[i].dist) {
+                    g->nodes[i].dist = u.dist + g->vertices[u_idx][i];
+                    g->nodes[i].prev = u.vertex;
+                    rearrange(heap, g->nodes[i].vertex, g->nodes[i].dist);
                 }
             }
         }
     }
     
-    for(i = 2; i < g.size; i++) {
-        if(g.nodes[i].prev == -1) {
+    for(i = 2; i < g->size; i++) {
+        if(g->nodes[i].prev == -1) {
             fprintf(output, "Cannot reach to node %d.\n", i);
             continue;
         }
         showPrev(g, i);
-        fprintf(output, "%d (cost: %d)\n", g.nodes[i].vertex, g.nodes[i].dist);
+        fprintf(output, "%d (cost: %d)\n", g->nodes[i].vertex, g->nodes[i].dist);
     }
 }
 
@@ -179,10 +180,10 @@ Node CreateNode(int vertex, int dist, int prev) {
     return temp;
 }
 
-int findIndex(Graph G, int X) {
+int findIndex(Graph* G, int X) {
     int i;
-    for(i = 1; i < G.size; i++) {
-        if(G.nodes[i].vertex == X)
+    for(i = 1; i < G->size; i++) {
+        if(G->nodes[i].vertex == X)
             return i;
     }
     return -1;
@@ -215,9 +216,9 @@ void rearrange(Heap* heap, int vertex, int distance) {
     }
 }
 
-void showPrev(Graph G, int idx) {
-    if(G.nodes[idx].prev != 1) {
-        showPrev(G, G.nodes[idx].prev);
+void showPrev(Graph* G, int idx) {
+    if(G->nodes[idx].prev != 1) {
+        showPrev(G, G->nodes[idx].prev);
     }
-    fprintf(output, "%d->", G.nodes[idx].prev);
+    fprintf(output, "%d->", G->nodes[idx].prev);
 }
